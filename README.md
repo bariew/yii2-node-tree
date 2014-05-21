@@ -1,3 +1,4 @@
+
 Node tree extension
 ===================
 Uses unique ids to create tree and display it with jstree
@@ -29,3 +30,4 @@ Once the extension is installed, simply use it in your code by  :
 
 ```php
 <?= \bariew\nodeTree\AutoloadExample::widget(); ?>```
+
