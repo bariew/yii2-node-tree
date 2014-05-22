@@ -2,58 +2,11 @@
 
 namespace bariew\nodeTree;
 use yii\base\Behavior;
-use yii\db\ActiveRecord;
+
 
 class PTARBehavior extends Behavior
 {
     protected $_name;
-    protected static $newIds = array();
-
-    public $oldAttributes = array();
-    
-    public function events() 
-    {
-        return [
-            ActiveRecord::EVENT_AFTER_FIND      => 'afterFind',
-            ActiveRecord::EVENT_AFTER_SAVE      => 'afterSave',
-            
-            ActiveRecord::EVENT_AFTER_DELETE    => 'afterFind',
-        ];
-    }
-
-    public function afterSave($event)
-    {
-        if($this->owner->isNewRecord){
-            $this->setNew();
-        }
-        parent::afterSave($event);
-    }
-
-    public function afterFind($event)
-    {
-        parent::afterFind($event);
-        $this->oldAttributes = $this->owner->attributes;
-    }
-
-    protected function setNew()
-    {
-        self::$newIds[] = $this->owner->id;
-    }
-
-    public function isNew($model)
-    {
-        return in_array($model->id, self::$newIds);
-    }
-
-    protected function getNewModel($attributes = array())
-    {
-        $className = get_class($this->owner);
-        $model = new $className();
-        foreach($attributes as $name=>$value){
-            $model->$name = $value;
-        }
-        return $model;
-    }
 
     public function find($criteria, $all=false, $array=false)
     {
@@ -81,11 +34,6 @@ class PTARBehavior extends Behavior
 		return $result;
 	}
 	
-    protected function getOldAttribute($attributeName)
-    {
-        return @$this->oldAttributes[$this->attr($attributeName)];
-    }
-
     protected function set($attributeName, $value)
     {
         $this->owner->{$this->attr($attributeName)} = $value;
@@ -100,7 +48,7 @@ class PTARBehavior extends Behavior
     public function attributesChanged($attributes)
     {
         foreach($attributes as $attribute){
-            if($this->get($attribute) !== $this->getOldAttribute($attribute)){
+            if($this->get($attribute) !== $this->owner->getOldAttribute($attribute)){
                 return true;
             }
         }
@@ -130,5 +78,18 @@ class PTARBehavior extends Behavior
             $this->$attribute = $value;
         }
         return $this;
+    }
+    
+    public static function fromEvent($event)
+    {
+        $className = get_called_class();
+        $model = new $className();
+        $model->attach($event->sender);
+        return $model;
+    }
+    
+    public function ownerBehavior($owner)
+    {
+        return $owner->getBehavior($this->getName());
     }
 }

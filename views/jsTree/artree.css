@@ -1,0 +1,12 @@
+.vakata-context.jstree-contextmenu li {
+    display: inline-block;
+}
+.vakata-context.jstree-contextmenu li a {
+    padding: 0 0 0 1.5em;
+}
+.vakata-context.jstree-contextmenu li a ins {
+    display:none;
+}
+.vakata-context.jstree-contextmenu li a span {
+    display:none;
+}

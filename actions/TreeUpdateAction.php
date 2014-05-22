@@ -1,5 +1,7 @@
 <?php
 
+namespace bariew\nodeTree\actions;
+
 class TreeUpdateAction extends TreeAction
 {
     public function run($id)
@@ -8,6 +10,6 @@ class TreeUpdateAction extends TreeAction
         if(($model->attributes = @$_POST['attributes']) && !$model->save()){
             throw new CHttpException(400, "Model not saved");
         }
-		echo json_encode($model->tree->nodeAttributes());
+        echo json_encode($model->getBehavior('nodeTree')->nodeAttributes());
     }
 }

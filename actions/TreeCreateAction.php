@@ -1,13 +1,15 @@
 <?php
+namespace bariew\nodeTree\actions;
 
 class TreeCreateAction extends TreeAction
 {
     public function run($id)
     {
         $model = $this->controller->getModel();
-        $model->attributes = $_POST['attributes'];
-        if($model->tree->move($id)){
-            echo json_encode($model->tree->nodeAttributes());
+        $model->scenario = 'nodeTree';
+        $post = ["Item" => \Yii::$app->request->post()['attributes']];
+        if($model->load($post) && $model->getBehavior('nodeTree')->move($id)){
+            echo json_encode($model->getBehavior('nodeTree')->nodeAttributes());
         }
     }
 }

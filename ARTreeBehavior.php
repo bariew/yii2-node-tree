@@ -1,6 +1,7 @@
 <?php
 
 namespace bariew\nodeTree;
+use yii\db\ActiveRecord;
 
 class ARTreeBehavior extends PTARBehavior
 {
@@ -13,10 +14,17 @@ class ARTreeBehavior extends PTARBehavior
     public $url         = 'url';
     public $name        = 'name';
     public $content     = 'content';
-    public $actionPath  = '/page/admin/update';
-
-    public static $receivedItems = array();
-
+    public $actionPath  = '/page/item/update';
+  
+    public function events() 
+    {
+        return [
+            ActiveRecord::EVENT_AFTER_INSERT    => 'afterSave',
+            ActiveRecord::EVENT_AFTER_UPDATE    => 'afterSave',
+            ActiveRecord::EVENT_AFTER_DELETE    => 'afterDelete',
+        ];
+    }
+    
     public function nodeAttributes($model=false)
     {
         $model = ($model) ? $model : $this->owner;
@@ -24,37 +32,13 @@ class ARTreeBehavior extends PTARBehavior
         return array(
             'id'    => "node-{$id}",
             'text'  => $model['title'],
-            'type'  => @$model['branch'] ? 'folder' : 'folder-ext',
+            'type'  => 'folder',
             //'li_attr'=>[],
             'a_attr'=> array(
                 'data-id'   => "node-{$id}",
                 'href'      => $this->actionPath . "?{$this->id}={$id}"
             )
         );
-    }
-
-    public function getBranch()
-    {
-        $criteria = new CDbCriteria(array(
-            'condition' => "pid = {$this->get('id')}",
-            'order'     => 'rank',
-            'select'    => 'id, pid, title, rank'
-        ));
-        $result = $this->nodeAttributes();
-        if(!$children = $this->find($criteria, true, true)){
-            return $result;
-        }
-        $ids = CHtml::listData($children, 'id', 'id');
-        $criteria = new CDbCriteria(array('select'=>'pid'));
-        $criteria->addInCondition('pid', array_values($ids));
-        $grandChildrenExist = CHtml::listData($this->find($criteria, true, true), 'pid', 'pid');
-        foreach($children as $child){
-            $result['children'][] = array_merge(
-                $this->nodeAttributes($child),
-                array('children'=>isset($grandChildrenExist[$child['id']]))
-            );
-        }
-        return $result;
     }
     
     public function getJsTree()
@@ -77,21 +61,21 @@ class ARTreeBehavior extends PTARBehavior
     
     public function getParent()
     {
-        return $this->owner->findByAttributes(array(
+        return $this->owner->findOne(array(
             $this->id => $this->get('parent_id')
         ));
     }
     
     public function getParentsCriteria($addCriteria = array())
     {
-        $criteria = new CDbCriteria();
+        $query = new CDbCriteria();
         $urls = array();
         while($this->url){
             $urls[] = $this->url = preg_replace('/(\d+)?\/$/','',$this->url);
         }
-        $criteria->addInCondition('url', $urls ? $urls : array(0));
-        $criteria->mergeWith($addCriteria);
-        return $criteria;
+        $query->addInCondition('url', $urls ? $urls : array(0));
+        $query->mergeWith($addCriteria);
+        return $query;
     }
     
     public function getChildren($addCriteria=array())
@@ -99,51 +83,45 @@ class ARTreeBehavior extends PTARBehavior
         if($this->owner->isNewRecord){
             return array();
         }
-        $criteria = new CDbCriteria();
-        $criteria->order = $this->rank;
-        $criteria->addColumnCondition(array($this->parent_id  => $this->owner->primaryKey))
+        $query = new CDbCriteria();
+        $query->order = $this->rank;
+        $query->addColumnCondition(array($this->parent_id  => $this->owner->primaryKey))
             ->mergeWith($addCriteria);
-        return $this->find($criteria, true);
+        return $this->find($query, true);
     }
 	
-	public function getDescendants($withParent = false, $addCriteria = array(), $asArray=true)
-	{
-        $criteria = new CDbCriteria();
-        $criteria->addCondition($this->getDescendantCondition($withParent))
-            ->mergeWith($addCriteria);
-		return $this->find($criteria, true, $asArray);
-	}
-
-    public function getDescendantCondition($withParent=false)
+    public function getDescendants($query)
     {
-        $url = $this->get('url');
-        $result = ($withParent) ? "{$this->url} = '{$url}' OR " : "";
-        $result .= "{$this->url} LIKE '{$url}%'";
-        return $result;
+        return $query->andWhere($this->getDescendantCondition())->all();
+    }
+
+    public function getDescendantCondition()
+    {
+        if(!$url = $this->get('url')){
+            $url = '/';
+        }
+        return ['like', 'url', $url];
     }
 
     
-	public function menuWidget($view='admin', $attributes=array(), $return=false)
-	{
+    public function menuWidget($view='node', $attributes=array(), $return=false)
+    {
         $items = $this->childrenTree($attributes);
         $behavior = $this;
-        return Yii::app()->controller->widget(
-            'ext.artree.ARTreeMenuWidget', 
-        	compact('view', 'items', 'behavior'),
-            $return
-        );
-	}
+        $widget =  new ARTreeMenuWidget(compact('view', 'items', 'behavior'), $return);
+        return $widget->run();
+    }
 
 	
 	/* TREE SERVICE */
 
     public function childrenTree($attributes=array())
     {
-        $criteria = new CDbCriteria();
+        $query = $this->owner->find();
         if($attributes){
-            $criteria->addColumnCondition($attributes);
+            $query->andFilterWhere($attributes);
         }
-        $items = $this->getDescendants(true, $criteria, true);
+        $items = $this->getDescendants($query);
         return $this->toTree($items);
     }
 		
@@ -153,11 +131,10 @@ class ARTreeBehavior extends PTARBehavior
         $result = array();
         $list   = array();
         foreach($items as $item){
-            self::$receivedItems[$item[$id]] = $item[$id];
             $thisref = &$result[$item[$id]];
             $children = isset($result[$item[$id]]['children'])
                 ? $result[$item[$id]]['children']
-				: array();
+		: array();
             $thisref = array('model'=>$item, 'children'=>$children);
             if($item[$id] == $this->get('id')){
                 $list[$item[$id]] = &$thisref;
@@ -165,6 +142,7 @@ class ARTreeBehavior extends PTARBehavior
                 $result[$item[$this->parent_id]]['children'][$item[$id]] = &$thisref;
             }
         }
+        
         return $this->rangeTree($list);
     }
 	
@@ -188,9 +166,9 @@ class ARTreeBehavior extends PTARBehavior
         $className = get_class($this->owner);
         $new = new $className;
         $new->attributes = $this->owner->attributes;
-        $new->tree->move($pid);
+        $this->ownerBehavior($new)->move($pid);
         foreach($this->getChildren() as $child){
-            $child->tree->cloneTo($new->id);
+            $this->ownerBehavior($child)->cloneTo($new->id);
         }
         return true;
     }
@@ -202,25 +180,28 @@ class ARTreeBehavior extends PTARBehavior
     {
         $model  = $this->owner;
         $oldUrl = $this->get('url');
-        $newUrl = (($parent = $this->getParent()) ? $parent->tree->get('url') : '/')
+        $newUrl = (($parent = $this->getParent()) ? $this->ownerBehavior($parent)->get('url') : '/')
             . $this->get('name') . "/";
         if($newUrl == $oldUrl){
             return true;
         }
-        if($oldUrl){
-            Yii::app()->db->createCommand("
+        if($oldUrl && $this->get('parent_id')){
+            \Yii::$app->db->createCommand("
                 UPDATE {$model->tableName()}
                   SET {$this->url} = REPLACE({$this->url}, '{$oldUrl}', '{$newUrl}')
                 WHERE {$this->url} LIKE '{$oldUrl}%'
             ")->execute();
         }
-        return $model->updateByPk($model->primaryKey, array($this->url => $newUrl));
+        $attributes = $this->get('parent_id') 
+            ? [$this->url  => $newUrl]
+            : [$this->name => ''];
+        return $model->updateAll($attributes, ['id'=>$model->primaryKey]);
     }
     
     public function move($pid, $position=false)
     {
         if($position === false){
-            $position = ($lastChild = $this->owner->findByAttributes(array(
+            $position = ($lastChild = $this->owner->findOne(array(
                 $this->parent_id => $pid
             ), array(
                 'order'     => 'rank DESC',
@@ -242,7 +223,7 @@ class ARTreeBehavior extends PTARBehavior
         $condition = "{$this->parent_id} = {$pid}
             AND {$this->rank} >= {$this->get('rank')}"
             . (($id = $this->get('id')) ? " AND id != {$id}" : "");
-        Yii::app()->db->createCommand("
+        \Yii::$app->db->createCommand("
             UPDATE {$this->owner->tableName()} SET {$this->rank} = ({$this->rank}+{$increment})
             WHERE {$condition}
         ")->execute();
@@ -252,18 +233,18 @@ class ARTreeBehavior extends PTARBehavior
 	
 	/* SYSTEM */
 
-    public function afterSave($event)
+    public static function afterSave($event)
     {
-        parent::afterSave($event);
-        if($this->attributesChanged(array('parent_id'))){
-            $this->createUrl();
+        $behavior = self::fromEvent($event);
+        if($behavior->attributesChanged(array('parent_id'))){
+            $behavior->createUrl();
         }
     }
 
-    public function afterDelete($event)
+    public static function afterDelete($event)
     {
-        parent::afterDelete($event);
-        $this->treeResort(-1);
-        $this->owner->deleteAll($this->getDescendantCondition());
+        $behavior = self::fromEvent($event);
+        $behavior->treeResort(-1);
+        $behavior->owner->deleteAll($behavior->getDescendantCondition());
     }
 }
