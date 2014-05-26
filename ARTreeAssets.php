@@ -20,6 +20,8 @@ class ARTreeAssets extends AssetBundle
         'artree.css'
     ];
     public $depends = [
-        'yii\web\JqueryAsset'
+        'yii\web\JqueryAsset',
+        'yii\web\YiiAsset',
+        'yii\bootstrap\BootstrapAsset',
     ];
 }
