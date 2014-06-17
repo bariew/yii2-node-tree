@@ -36,13 +36,13 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 "create"  =>  [
                     "label"   => "<i class='glyphicon glyphicon-plus' title='Create'></i>",
                     "action" => 'function(obj){
-                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "treeCreate");
+                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-create");
                         var id = $(obj.reference[0]).data("id");
                         var title = "New node";
 
                         $.post(url, {"attributes" : {"title" : title} }, function(data){
                             var attributes = JSON.parse(data);
-                            var url = replaceTreeUrl(attributes["a_attr"]["href"], "treeUpdate");
+                            var url = replaceTreeUrl(attributes["a_attr"]["href"], "tree-update");
                             window.location.href = attributes["a_attr"]["href"];
                         });
                     }'
@@ -64,7 +64,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 "delete" => [
                     "label"   => "<i class='glyphicon glyphicon-trash' title='Delete'></i>",
                     "action" => 'function(obj) {
-                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "treeDelete");
+                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-delete");
                         if(confirm("Delete node?")) {
                             $.get(url, function(){
                                 var ref = jstree.jstree(true),
@@ -83,7 +83,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
         'move_node.jstree'  => 'function(event, data){
             $.ajax({
                 type: "POST",
-                url: replaceTreeUrl(data.node.a_attr.href, "treeMove"),
+                url: replaceTreeUrl(data.node.a_attr.href, "tree-move"),
                 data: {
                     pid     : data.parent.replace("node-", ""),
                     position: data.position
