@@ -8,7 +8,7 @@ class TreeUpdateAction extends TreeAction
     {
         $model = $this->controller->getModel($id);
         if(($model->attributes = @$_POST['attributes']) && !$model->save()){
-            throw new CHttpException(400, "Model not saved");
+            throw new \yii\web\HttpException(400, "Model not saved");
         }
         echo json_encode($model->getBehavior('nodeTree')->nodeAttributes());
     }

@@ -9,9 +9,11 @@ class TreeDeleteAction extends TreeAction
         if(!$model->isNewRecord && $model->delete()){
             \Yii::$app->session->setFlash('success', 'Removed.');
         }
-        $this->controller->redirect($pid
-                ? array('read', 'id'=>$pid)
-                : array('index')
-        );
+        if (!\Yii::$app->request->isAjax) {
+            $this->controller->redirect($pid
+                    ? array('read', 'id'=>$pid)
+                    : array('index')
+            );
+        }
     }
 }
