@@ -8,7 +8,7 @@ class TreeMoveAction extends TreeAction
     {
         $model = $this->controller->getModel($id);
         if(!$model->getBehavior('nodeTree')->move($_POST['pid'], $_POST['position'])){
-            throw new CHttpException(400, "Could not save changes");
+            throw new \yii\web\HttpException(400, "Could not save changes");
         }
     }
 }
