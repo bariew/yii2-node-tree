@@ -13,6 +13,7 @@ class ARTreeAssets extends AssetBundle
         'src/jstree.types.js',
         'src/jstree.state.js',
         'src/jstree.contextmenu.js',
+        'src/jstree.checkbox.js',
         'artree.js'
     ];
     public $css = [

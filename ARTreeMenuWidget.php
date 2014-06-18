@@ -12,7 +12,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
     public $binds = [];
     
     
-    protected static $commonOptions = [
+    public static $commonOptions = [
         "core" => [
             "check_callback" => true,
             "animation" => 0
@@ -21,10 +21,12 @@ class ARTreeMenuWidget extends \yii\base\Widget
             "contextmenu", "dnd", "search", "types"
         ],
         "dnd"   => [
-            "is_draggable"  => true
+            "is_draggable"  => true,
+            "copy"          => true
         ],
         "types" => [
-            "folder"        => ["icon" => "glyphicon glyphicon-file"]
+            "file"        => ["icon" => "glyphicon glyphicon-file"],
+            "book"          => ["icon" => "glyphicon glyphicon-book"],
         ],
         "search"  =>   [
             "fuzzy"   => false
@@ -79,7 +81,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
         ]
     ];
     
-    protected static $commonBinds = [
+    public static $commonBinds = [
         'move_node.jstree'  => 'function(event, data){
             $.ajax({
                 type: "POST",
@@ -93,7 +95,27 @@ class ARTreeMenuWidget extends \yii\base\Widget
                     alert(status);
                 }
             });
-        }'
+        }',
+        'copy_node.jstree'  => 'function(event, data){
+            $.ajax({
+                type: "POST",
+                url: replaceTreeUrl(data.node.a_attr.href, "tree-copy"),
+                data: {
+                    pid     : data.parent.replace("node-", ""),
+                    position: data.position
+                },
+                success: function(data){},
+                error: function(xhr, status, error){
+                    alert(status);
+                }
+            });
+        }',
+        'select_node.jstree'  => 'function(event, data){
+            if ($(".jstree-contextmenu:visible").length) {
+                return;
+            }
+            window.location.href = data.node.a_attr.href;
+        }',
     ];
     
     public function run()

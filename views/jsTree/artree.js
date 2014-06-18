@@ -19,6 +19,3 @@ function arTreeRename(id, url, jstree){
 function replaceTreeUrl(url, action){
     return url.replace(/\/\w+\?/,"/"+action+"?");
 }
-$(document).on('click', '.jstree-container-ul a', function(){
-        arTreeShowUpdate($(this).prop('href'));
-});
