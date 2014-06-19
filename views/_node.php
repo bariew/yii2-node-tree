@@ -1,11 +1,14 @@
 <?php
+    $pid        = isset($parent) ? $parent[$behavior->id] : '';
+    $attributes = $behavior->nodeAttributes($item, $pid);
+    $children   = $attributes['children'];
+    $item       = $attributes['model'];
+    $active     = @$attributes['selected'] 
+        || ($item[$behavior->id] == @$_GET[$behavior->id] && $pid == @$_GET['pid'])
+        || ($item[$behavior->id] == @$_GET[$behavior->id] && !@$_GET['pid'])
+        || !$pid && !@$_GET['pid'] && !@$_GET[$behavior->id]
+    ;
     
-    $item       = $item['model'];
-    $attributes = $behavior->nodeAttributes($item, @$parent[$behavior->id]);
-    $parent     = $item;
-    $children   = $item['children'];
-    $id = str_replace('node-', '', $attributes['id']);
-    $active     = (@$attributes['selected'] || ($id == @$_GET[$behavior->id]));
     echo \yii\helpers\Html::beginTag('li', array(
         'id'            => $attributes['id'],
         'data-jstree'   => json_encode(array(
@@ -14,9 +17,14 @@
             "type"      => $attributes['type']
         ))
     ));
-    echo \yii\helpers\Html::a(" ".$attributes['text'], $attributes['a_attr']['href'], $attributes['a_attr']);
+    
+    echo \yii\helpers\Html::a(
+        " ".$attributes['text'], 
+        $attributes['a_attr']['href'], 
+        $attributes['a_attr']);
 ;?>
-    <?php if(!empty($children)): ?>
+    <?php $parent     = $item;
+        if(!empty($children)): ?>
         <ul>
             <?php foreach($children as $item): ?>
                     <?php echo $this->render($viewName, compact('item', 'viewName', 'behavior', 'parent')); ?>

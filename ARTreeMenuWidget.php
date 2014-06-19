@@ -39,14 +39,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
                     "label"   => "<i class='glyphicon glyphicon-plus' title='Create'></i>",
                     "action" => 'function(obj){
                         var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-create");
-                        var id = $(obj.reference[0]).data("id");
-                        var title = "New node";
-
-                        $.post(url, {"attributes" : {"title" : title} }, function(data){
-                            var attributes = JSON.parse(data);
-                            var url = replaceTreeUrl(attributes["a_attr"]["href"], "tree-update");
-                            window.location.href = attributes["a_attr"]["href"];
-                        });
+                        window.location.href = url;
                     }'
                 ],
                 "rename"  => [
@@ -87,10 +80,13 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 type: "POST",
                 url: replaceTreeUrl(data.node.a_attr.href, "tree-move"),
                 data: {
-                    pid     : data.parent.replace("node-", ""),
+                    pid     : data.parent.replace(/.*-id-(.*)$/, "$1"),
                     position: data.position
                 },
-                success: function(data){},
+                success: function(response){
+                    var attributes = JSON.parse(response);
+                    $("a[data-id="+data.node.id+"]").prop("href", attributes.a_attr.href);
+                },
                 error: function(xhr, status, error){
                     alert(status);
                 }
@@ -101,17 +97,20 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 type: "POST",
                 url: replaceTreeUrl(data.node.a_attr.href, "tree-copy"),
                 data: {
-                    pid     : data.parent.replace("node-", ""),
+                    pid     : data.parent.replace(/.*-id-(.*)$/, "$1"),
                     position: data.position
                 },
-                success: function(data){},
+                success: function(response){
+                    var attributes = JSON.parse(response);
+                    $("a[data-id="+data.node.id+"]").prop("href", attributes.a_attr.href);
+                },
                 error: function(xhr, status, error){
                     alert(status);
                 }
             });
         }',
         'select_node.jstree'  => 'function(event, data){
-            if ($(".jstree-contextmenu:visible").length) {
+            if (data.event.which != 1) {
                 return;
             }
             window.location.href = data.node.a_attr.href;

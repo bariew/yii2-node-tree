@@ -15,7 +15,9 @@ class ARTreeBehavior extends PTARBehavior
     public $name        = 'name';
     public $content     = 'content';
     public $actionPath  = '/page/item/update';
-  
+    
+    public static $uniqueKey = 0;
+
     public function events() 
     {
         return [
@@ -25,18 +27,23 @@ class ARTreeBehavior extends PTARBehavior
         ];
     }
     
-    public function nodeAttributes($model=false)
+    public function nodeAttributes($model = false, $pid = '')
     {
-        $model = ($model) ? $model : $this->owner;
-        $id = $model['id'];
+        $uniqueKey = self::$uniqueKey++;
+        $children = (array) @$model['children'];
+        $model = ($model) ? $model['model'] : $this->owner;
+        $id    = $model[$this->id];
+        $nodeId = $uniqueKey . '-id-' . $id;
         return array(
-            'id'    => "node-{$id}",
+            'id'    => $nodeId,
+            'model'  => $model,
+            'children'=>$children,
             'text'  => $model['title'],
             'type'  => 'folder',
             //'li_attr'=>[],
             'a_attr'=> array(
-                'data-id'   => "node-{$id}",
-                'href'      => $this->actionPath . "?{$this->id}={$id}"
+                'data-id'   => $nodeId,
+                'href'      => $this->actionPath . "?{$this->id}={$id}&pid={$pid}"
             )
         );
     }
