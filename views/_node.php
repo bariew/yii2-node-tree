@@ -27,7 +27,7 @@
         if(!empty($children)): ?>
         <ul>
             <?php foreach($children as $item): ?>
-                    <?php echo $this->render($viewName, compact('item', 'viewName', 'behavior', 'parent')); ?>
+                    <?php echo $this->render($childView, compact('item', 'childView', 'behavior', 'parent')); ?>
             <?php endforeach; ?>
         </ul>	    
     <?php endif; ?>

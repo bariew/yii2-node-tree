@@ -124,6 +124,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
         }
         $this->registerScripts();
         return $this->render($this->view, [
+            'childView' => '_' . $this->view,
             'items'     => $this->items, 
             'behavior'  => $this->behavior
         ]);
