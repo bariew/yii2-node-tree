@@ -7,7 +7,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
     public $items;
     public $behavior; // ARTreeBehavior instance
     public $view = 'node';
-    public $selector = '#jstree';
+    public $id = 'jstree';
     public $options = [];
     public $binds = [];
     
@@ -136,8 +136,8 @@ class ARTreeMenuWidget extends \yii\base\Widget
         ARTreeAssets::register($view);
         $options = $this->jsonEncode(array_merge(self::$commonOptions, $this->options));
         $binds = array_merge(self::$commonBinds, $this->binds);        
-        $content = "var jstree = $('{$this->selector}'); jstree.jstree({$options});";
-	foreach($binds as $event => $function){
+        $content = "var jstree = $('#{$this->id}'); jstree.jstree({$options});";
+	    foreach($binds as $event => $function){
             $content .= "jstree.bind('".$event."', $function);";
         }
         $view->registerJs($content);
