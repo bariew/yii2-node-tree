@@ -8,9 +8,8 @@
 </div>
 <div class='tree' id='jstree'>
     <ul>
-        <?php $viewName = '_' . preg_replace('/.*\/(\w+)\.php$/', '$1', __FILE__); ?>
         <?php foreach($items as $item): ?>
-            <?php echo $this->render($viewName, compact('item', 'viewName', 'behavior')); ?>
+            <?php echo $this->render($childView, compact('item', 'childView', 'behavior')); ?>
         <?php endforeach; ?>
     </ul>
 </div>

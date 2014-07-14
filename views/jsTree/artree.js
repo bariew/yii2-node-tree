@@ -8,13 +8,11 @@ function arTreeShowUpdate(url){
 
 function arTreeRename(id, url, jstree){
     url = url ? url : jstree.jstree("get_node", id, true).find("a").attr("href");
-    url = replaceTreeUrl(url, "treeUpdate");
+    url = replaceTreeUrl(url, "tree-update");
     jstree.jstree(true).edit(id);
     $(".jstree-rename-input").off("change").on("change",function(){
         var title = $(this).val();
-        $.post(url, {attributes:{title:title}}, function(){
-            arTreeShowUpdate(replaceTreeUrl(url, "update"));
-        });
+        $.post(url, {attributes:{title:title}}, function(){});
     });
 }
 

@@ -12,7 +12,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
     public $binds = [];
     
     
-    protected static $commonOptions = [
+    public static $commonOptions = [
         "core" => [
             "check_callback" => true,
             "animation" => 0
@@ -21,10 +21,12 @@ class ARTreeMenuWidget extends \yii\base\Widget
             "contextmenu", "dnd", "search", "types"
         ],
         "dnd"   => [
-            "is_draggable"  => true
+            "is_draggable"  => true,
+            "copy"          => true
         ],
         "types" => [
-            "folder"        => ["icon" => "glyphicon glyphicon-file"]
+            "file"        => ["icon" => "glyphicon glyphicon-file"],
+            "book"          => ["icon" => "glyphicon glyphicon-book"],
         ],
         "search"  =>   [
             "fuzzy"   => false
@@ -36,15 +38,8 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 "create"  =>  [
                     "label"   => "<i class='glyphicon glyphicon-plus' title='Create'></i>",
                     "action" => 'function(obj){
-                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "treeCreate");
-                        var id = $(obj.reference[0]).data("id");
-                        var title = "New node";
-
-                        $.post(url, {"attributes" : {"title" : title} }, function(data){
-                            var attributes = JSON.parse(data);
-                            var url = replaceTreeUrl(attributes["a_attr"]["href"], "treeUpdate");
-                            window.location.href = attributes["a_attr"]["href"];
-                        });
+                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-create");
+                        window.location.href = url;
                     }'
                 ],
                 "rename"  => [
@@ -64,7 +59,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
                 "delete" => [
                     "label"   => "<i class='glyphicon glyphicon-trash' title='Delete'></i>",
                     "action" => 'function(obj) {
-                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "treeDelete");
+                        var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-delete");
                         if(confirm("Delete node?")) {
                             $.get(url, function(){
                                 var ref = jstree.jstree(true),
@@ -79,21 +74,47 @@ class ARTreeMenuWidget extends \yii\base\Widget
         ]
     ];
     
-    protected static $commonBinds = [
+    public static $commonBinds = [
         'move_node.jstree'  => 'function(event, data){
             $.ajax({
                 type: "POST",
-                url: replaceTreeUrl(data.node.a_attr.href, "treeMove"),
+                url: replaceTreeUrl(data.node.a_attr.href, "tree-move"),
                 data: {
-                    pid     : data.parent.replace("node-", ""),
+                    pid     : data.parent.replace(/.*-id-(.*)$/, "$1"),
                     position: data.position
                 },
-                success: function(data){},
+                success: function(response){
+                    var attributes = JSON.parse(response);
+                    $("a[data-id="+data.node.id+"]").prop("href", attributes.a_attr.href);
+                },
                 error: function(xhr, status, error){
                     alert(status);
                 }
             });
-        }'
+        }',
+        'copy_node.jstree'  => 'function(event, data){
+            $.ajax({
+                type: "POST",
+                url: replaceTreeUrl(data.node.a_attr.href, "tree-copy"),
+                data: {
+                    pid     : data.parent.replace(/.*-id-(.*)$/, "$1"),
+                    position: data.position
+                },
+                success: function(response){
+                    var attributes = JSON.parse(response);
+                    $("a[data-id="+data.node.id+"]").prop("href", attributes.a_attr.href);
+                },
+                error: function(xhr, status, error){
+                    alert(status);
+                }
+            });
+        }',
+        'select_node.jstree'  => 'function(event, data){
+            if (data.event.which != 1) {
+                return;
+            }
+            window.location.href = data.node.a_attr.href;
+        }',
     ];
     
     public function run()
@@ -103,6 +124,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
         }
         $this->registerScripts();
         return $this->render($this->view, [
+            'childView' => '_' . $this->view,
             'items'     => $this->items, 
             'behavior'  => $this->behavior
         ]);
