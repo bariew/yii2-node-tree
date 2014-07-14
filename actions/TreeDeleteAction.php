@@ -5,7 +5,7 @@ class TreeDeleteAction extends TreeAction
 {
     public function run($id, $pid=false)
     {
-        $model = $this->controller->getModel($id);
+        $model = $this->controller->findModel($id);
         if(!$model->isNewRecord && $model->delete()){
             \Yii::$app->session->setFlash('success', 'Removed.');
         }

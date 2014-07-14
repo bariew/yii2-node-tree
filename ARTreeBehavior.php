@@ -43,7 +43,7 @@ class ARTreeBehavior extends PTARBehavior
             //'li_attr'=>[],
             'a_attr'=> array(
                 'data-id'   => $nodeId,
-                'href'      => $this->actionPath . "?{$this->id}={$id}&pid={$pid}"
+                'href'    => [$this->actionPath, $this->id => $id, 'pid'=>$pid]
             )
         );
     }

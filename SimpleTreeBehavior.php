@@ -53,7 +53,8 @@ class SimpleTreeBehavior extends Behavior
     /**
      * Generates attributes for jstree item from owner model.
      * @param mixed $model model.
-     * @param integer $pid view item parent id.
+     * @param int|string $pid view item parent id.
+     * @param bool $uniqueKey
      * @return array attributes
      */
     public function nodeAttributes($model = false, $pid = '', $uniqueKey = false)
@@ -72,15 +73,15 @@ class SimpleTreeBehavior extends Behavior
             'a_attr' => array(
                 'class' => 'jstree-clicked',
                 'data-id' => $nodeId,
-                'href'    => $this->actionPath . "?{$this->id}={$id}&pid={$pid}"
+                'href'    => [$this->actionPath, $this->id => $id, 'pid'=>$pid]
             )
         );
     }
-    
+
     /**
      * Generates jstree menu from owner children.
      * @param array $data data for widget
-     * @param string $callback $this method name for data processing
+     * @param bool|string $callback $this method name for data processing
      * - define it for variable options and bind functions attaching.
      * @return Widget menu widget
      */

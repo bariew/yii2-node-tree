@@ -6,7 +6,7 @@ class TreeUpdateAction extends TreeAction
 {
     public function run($id)
     {
-        $model = $this->controller->getModel($id);
+        $model = $this->controller->findModel($id);
         if(($model->attributes = @$_POST['attributes']) && !$model->save()){
             throw new \yii\web\HttpException(400, "Model not saved");
         }
