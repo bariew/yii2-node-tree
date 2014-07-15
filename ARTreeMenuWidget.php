@@ -178,4 +178,9 @@ class ARTreeMenuWidget extends \yii\base\Widget
             ? $content
             : str_replace($this->jsonKeys, $this->jsonValues, json_encode($content));
     }
+
+    public static function this()
+    {
+        return new self();
+    }
 }
