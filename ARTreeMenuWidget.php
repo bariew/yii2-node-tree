@@ -10,6 +10,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
     public $id = 'jstree';
     public $options = [];
     public $binds = [];
+    public static $uniqueKey = 0;
     
     
     public function commonOptions()
