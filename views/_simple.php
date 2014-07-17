@@ -1,19 +1,21 @@
 <?php
+    $id = isset($id) ? "{$id}\\{$item}" : $item;
     $items = $children;
+    $activeId = $this->context->behavior->getActiveNodeId($this->context->id);
     echo \yii\helpers\Html::beginTag('li', array(
-        'id'            => \bariew\nodeTree\ARTreeMenuWidget::$uniqueKey++,
+        'id'            => $id,
         'data-jstree'   => json_encode(array(
-            "opened"    => false,
-            "selected"  => false,
+            "opened"    => strpos($activeId, $id) === 0,
+            "selected"  => $activeId == $id,
             "type"      => 'folder'
         ))
     ));
-    echo \yii\helpers\Html::a(" {$item}", '#');
+    echo \yii\helpers\Html::a($item, '#', ['data-id' => $id]);
 ;?>
-        <ul>
-            <?php foreach($items as $item => $children): ?>
-                <?php if(!is_array($children)) { $children = []; } ;?>
-                <?php echo $this->render($childView, compact('item', 'childView', 'children')); ?>
-            <?php endforeach; ?>
-        </ul>	    
+    <ul>
+        <?php foreach($items as $item => $children): ?>
+            <?php if(!is_array($children)) { $children = []; } ;?>
+            <?php echo $this->render($childView, compact('item', 'childView', 'children', 'id')); ?>
+        <?php endforeach; ?>
+    </ul>
 </li>

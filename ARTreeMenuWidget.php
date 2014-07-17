@@ -139,7 +139,7 @@ class ARTreeMenuWidget extends \yii\base\Widget
         ]);
     }
     
-    protected function registerScripts()
+    public function registerScripts()
     {
         $view = $this->getView();
         ARTreeAssets::register($view);
