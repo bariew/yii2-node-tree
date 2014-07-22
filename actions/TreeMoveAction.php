@@ -2,12 +2,14 @@
 
 namespace bariew\nodeTree\actions;
 
-class TreeMoveAction extends TreeAction
+use yii\base\Action;
+
+class TreeMoveAction extends Action
 {
     public function run($id)
     {
         $model = $this->controller->findModel($id);
-        if(!$model->getBehavior('nodeTree')->move($_POST['pid'], $_POST['position'])){
+        if(!$model->treeMove($_POST['pid'], $_POST['position'])){
             throw new \yii\web\HttpException(400, "Could not save changes");
         }
     }

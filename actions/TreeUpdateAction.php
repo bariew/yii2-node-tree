@@ -2,7 +2,9 @@
 
 namespace bariew\nodeTree\actions;
 
-class TreeUpdateAction extends TreeAction
+use yii\base\Action;
+
+class TreeUpdateAction extends Action
 {
     public function run($id)
     {
@@ -10,6 +12,6 @@ class TreeUpdateAction extends TreeAction
         if(($model->attributes = @$_POST['attributes']) && !$model->save()){
             throw new \yii\web\HttpException(400, "Model not saved");
         }
-        echo json_encode($model->getBehavior('nodeTree')->nodeAttributes());
+        echo json_encode($model->nodeAttributes());
     }
 }

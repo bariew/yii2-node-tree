@@ -7,7 +7,7 @@
         'data-jstree'   => json_encode(array(
             "opened"    => strpos($activeId, $id) === 0,
             "selected"  => $activeId == $id,
-            "type"      => 'folder'
+            "type"      => $items ? 'folder' : 'file'
         ))
     ));
     echo \yii\helpers\Html::a($item, '#', ['data-id' => $id]);
