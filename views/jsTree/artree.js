@@ -17,5 +17,5 @@ function arTreeRename(id, url, jstree){
 }
 
 function replaceTreeUrl(url, action){
-    return url.replace(/\/\w+\?/,"/"+action+"?");
+    return url.replace(/\/update\?/,"/"+action+"?").replace(/\/update\//,"/"+action+"/");
 }
