@@ -156,7 +156,7 @@ class ARTreeBehavior extends Behavior
         $selfShift = ($pid == $this->get('parent_id')) && ($rank > $this->get('rank'));
         $this->treeResort($this->get('rank'), -1);
         $this->set('parent_id', $pid)->createUrl();
-        $this->treeResort($rank - ($selfShift ? 0 : 1), 1);
+        $this->treeResort($rank - ($selfShift ? 2 : 1), 1);
         return $this->owner->updateAttributes([
             $this->parent_id => $pid,
             $this->rank      => $rank
