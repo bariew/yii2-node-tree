@@ -92,6 +92,9 @@ class ARTreeMenuWidget extends \yii\base\Widget
                         position: data.position
                     },
                     success: function(response){
+                        if(!response){
+                            return;
+                        }
                         var attributes = JSON.parse(response);
                         $("a[data-id="+data.node.id+"]").prop("href", attributes.a_attr.href);
                     },

@@ -10,8 +10,6 @@
     <ul>
         <?php foreach($items as $i => $item): ?>
             <?php
-            $id =  "tree-node-" . $item['id'];
-            $prev = @$items[$i-1];
             $next = @$items[$i+1];
             $isParent = $next && $next['depth'] > $item['depth'];
             $lastDepth = $next ? ($item['depth'] - $next['depth']) : $item['depth'];
@@ -19,8 +17,8 @@
             echo \yii\helpers\Html::beginTag('li', array(
                 'id'            => $attributes['id'],
                 'data-jstree'   => json_encode(array(
-                    //  "opened"    => strpos($activeId, $id) === 0,
-                    //  "selected"  => $activeId == $id,
+                    "opened"    => $attributes['active'],
+                    "selected"  => $attributes['active'],
                     "type"      => $items ? 'folder' : 'file'
                 ))
             ));
@@ -29,8 +27,7 @@
             while ($lastDepth > 0) {
                 $lastDepth--;
                 echo "</ul></li>";
-            }
-            ; ?>
+            } ?>
         <?php endforeach; ?>
     </ul>
 </div>

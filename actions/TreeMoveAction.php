@@ -12,5 +12,6 @@ class TreeMoveAction extends Action
         if(!$model->treeMove($_POST['pid'], $_POST['position'])){
             throw new \yii\web\HttpException(400, "Could not save changes");
         }
+        echo json_encode($model->nodeAttributes());
     }
 }
