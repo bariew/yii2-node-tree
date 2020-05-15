@@ -1,8 +1,14 @@
 <?php
+/**
+ * ARTreeAssets class file.
+ */
 
 namespace bariew\nodeTree;
 use yii\web\AssetBundle;
 
+/**
+ * Description:
+ */
 class ARTreeAssets extends AssetBundle
 {
     public $sourcePath = '@vendor/bariew/yii2-node-tree/views/jsTree';
@@ -22,7 +28,5 @@ class ARTreeAssets extends AssetBundle
     ];
     public $depends = [
         'yii\web\JqueryAsset',
-        'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
     ];
 }
