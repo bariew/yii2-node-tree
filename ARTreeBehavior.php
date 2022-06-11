@@ -37,7 +37,7 @@ class ARTreeBehavior extends Behavior
 
     public function beforeInsert()
     {
-        $this->set('rank', $this->getLastRank() + 1);
+        $this->set($this->rank, $this->getLastRank() + 1);
         $this->createUrl();
     }
 
@@ -166,9 +166,8 @@ class ARTreeBehavior extends Behavior
     private function treeResort($rank = 0, $increment = 1)
     {
         return $this->owner->updateAllCounters(
-            ['rank' => $increment],
-            "{$this->parent_id} = :parent_id AND rank > :rank",
-            [':rank' => $rank, ':parent_id' => $this->get('parent_id')]
+            [$this->rank => $increment],
+            ['AND', [$this->parent_id => $this->get('parent_id')], ['>', $this->rank, $rank]]
         );
     }
 
@@ -203,7 +202,7 @@ class ARTreeBehavior extends Behavior
 
     protected function getLastRank()
     {
-        $max = $this->owner->find()->where([$this->parent_id => $this->get('parent_id')])->max($this->rank);
+        $max = $this->owner->find()->where([$this->parent_id => $this->get('parent_id')])->max("`{$this->rank}`");
         return is_numeric($max) ? $max : -1;
     }
 }
